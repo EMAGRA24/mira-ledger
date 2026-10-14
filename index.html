@@ -932,7 +932,7 @@ function vSavings(){const gs=st().goals||[];const pl=st().plan||{spendPct:70};
   h+=`</div><div class="card" hidden><div class="cardhead"><h2>Spending budget</h2></div><form class="edit" data-planform style="margin-top:0"><div class="q"><label for="spendPct">Spend up to this % of income</label><input class="inp" id="spendPct" name="spendPct" type="number" min="0" max="100" value="${esc(pl.spendPct??70)}"></div><button class="btn primary sm" type="submit">Save</button></form></div>`;
   return h}
 function vMore(){const sec=UI.moreSec;
-  if(!sec)return pageHead("More")+`<div class="card menu">${MORE_SECS.map(([k,l,s])=>`<button class="mrow" data-msec="${k}"><span class="grow"><b>${l}</b><small>${s}</small></span><span aria-hidden="true">›</span></button>`).join("")}</div><p class="hint" style="text-align:center">Mira Ledger · data saved on this device</p>`;
+  if(!sec)return pageHead("More")+`<div class="card menu">${MORE_SECS.map(([k,l,s])=>`<button class="mrow" data-msec="${k}"><span class="grow"><b>${l}</b><small>${s}</small></span><span aria-hidden="true">›</span></button>`).join("")}</div><p class="hint" style="text-align:center">Mira Ledger · data saved on this device · version 1.4</p>`;
   const back=`<button class="btn ghost sm" data-msec="">‹ More</button>`;
   if(sec==="accounts")return pageHead("Accounts",back)+vAccounts();
   if(sec==="backup")return pageHead("Backup & restore",back)+vBackup();
