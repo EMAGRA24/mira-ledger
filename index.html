@@ -950,7 +950,7 @@ function goFocus(){const f=UI.focus;if(!f)return;requestAnimationFrame(()=>{cons
 function setTab(t){const[a,b]=String(t).split(":");if(a==="search")setTimeout(()=>{const i=$("#q");if(i){i.focus();i.select()}},30);UI.tab=a;if(a==="plan"&&b)UI.planSec=b;if(a==="more")UI.moreSec=b||null;UI.confirm=null;UI.editing=null;try{localStorage.setItem("wl-tab2",a)}catch(e){}render();window.scrollTo(0,0);goFocus()}
 function render(){renderTabs();const v=$("#view");
   if(!S.sLoaded){v.innerHTML=`<div class="empty">Opening your ledger…</div>`;return}
-  if(!st()){v.innerHTML=`<div class="card"><h2>Your ledger isn't set up yet</h2><p class="muted">Welcome to Mira Ledger. If you have a backup file, restore it to load your accounts, bills, debts and entries.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="restore">Restore from a backup file</button><button class="btn" data-act="init">Start an empty ledger</button></div><p class="hint">Your data is stored on this phone only. Make a backup now and then from More → Backup &amp; restore.</p></div>`;return}
+  if(!st()){v.innerHTML=`<div class="card"><h2>Your ledger isn't set up yet</h2><p class="muted">Welcome to Mira Ledger. If you have a backup file, restore it to load your accounts, bills, debts and entries.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="restore">Restore from a backup file</button><button class="btn" data-act="init">Start an empty ledger</button><button class="btn ghost" data-act="pastebox">Paste backup instead</button></div>${UI.pasteOpen?pasteBox():""}<p class="hint">Your data is stored on this phone only. Make a backup now and then from More → Backup &amp; restore.</p></div>`;return}
   const fn={search:vSearch,home:vHome,activity:()=>pageHead("Activity",monthBar())+vActivity(),add:vAdd,plan:vPlan,more:vMore}[UI.tab]||vHome;
   v.innerHTML=fn();
   const sw=$("#sheetwrap");const had=!!sw.firstChild;sw.innerHTML=UI.editEntry?entrySheet():"";document.body.classList.toggle("noscroll",!!UI.editEntry);
@@ -1189,9 +1189,12 @@ function vBackup(){const lb=lastBackup();const n=S.entries.length;
    <p class="small" style="margin:0 0 12px">${n} entries · last backup: <b>${lb?dateNice(lb.slice(0,10)):"never"}</b></p>
    <button class="btn primary" data-act="backup">Download backup file</button></div>
   <div class="card"><div class="cardhead"><h2>Restore</h2></div><p class="muted" style="margin:0 0 10px">Load a backup file. This replaces everything currently on this phone.</p>
-   <button class="btn ${UI.confirm==="restore"?"danger":""}" data-act="restore">${UI.confirm==="restore"?"Tap again to choose the file":"Restore from file"}</button></div>`}
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ${UI.confirm==="restore"?"danger":""}" data-act="restore">${UI.confirm==="restore"?"Tap again to choose the file":"Restore from file"}</button><button class="btn ghost" data-act="pastebox">Paste backup instead</button></div>
+   ${UI.pasteOpen?pasteBox():""}</div>`}
+function pasteBox(){return `<div class="q" style="margin-top:12px"><label for="pastejson">Paste the backup text</label><textarea class="inp" id="pastejson" rows="5" placeholder='Starts with {"app":"Mira Ledger"…'></textarea><button class="btn primary" data-act="pasterestore" style="margin-top:8px;align-self:flex-start">Restore pasted backup</button><span class="hint">Open the backup file, select all, copy, then paste it here. This replaces what's on this phone.</span></div>`}
+function restoreText(txt){try{const obj=JSON.parse(txt);if(!obj||!("settings" in obj)||!obj.entries)throw 0;if(db.importAll(obj)){UI.confirm=null;UI.pasteOpen=false;UI.tab="home";toast(`Restored ${(Array.isArray(obj.entries)?obj.entries:Object.values(obj.entries)).length} entries`)}}catch(e){toast("That isn't a Mira Ledger backup. Copy the whole file.")}}
 function doBackup(){const blob=new Blob([JSON.stringify(db.exportAll(),null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="mira-ledger-backup-"+todayStr()+".json";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);try{localStorage.setItem("mira-last-backup",new Date().toISOString())}catch(e){}toast("Backup downloaded");render()}
-function pickRestore(){const i=document.createElement("input");i.type="file";i.accept=".json,application/json";i.onchange=async()=>{const f=i.files&&i.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!obj||!("settings" in obj)||!obj.entries)throw 0;
+function pickRestore(){const i=document.createElement("input");i.type="file";i.onchange=async()=>{const f=i.files&&i.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!obj||!("settings" in obj)||!obj.entries)throw 0;
   if(db.importAll(obj)){UI.confirm=null;UI.tab="home";toast(`Restored ${(Array.isArray(obj.entries)?obj.entries:Object.values(obj.entries)).length} entries`)}}catch(e){toast("That file isn't a Mira Ledger backup.")}};i.click()}
 /* ---------- events ---------- */
 document.addEventListener("click",async ev=>{const t=ev.target.closest("button,[data-tab],[data-openentry],[data-closesheet],[data-pclose]");if(!t)return;const d=t.dataset;
@@ -1215,6 +1218,8 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,[
   if(d.wiz==="back"){wizBack();return}
   if(d.wiz==="next"){wizNext();return}
   if(d.wiz==="again"){resetWizard(true);render();focusStep();return}
+  if(d.act==="pastebox"){UI.pasteOpen=!UI.pasteOpen;render();return}
+  if(d.act==="pasterestore"){restoreText(($("#pastejson")||{}).value||"");return}
   if(d.act==="backup"){doBackup();return}
   if(d.act==="restore"){if(st()&&UI.confirm!=="restore"){UI.confirm="restore";render();return}pickRestore();return}
   if(d.act==="init"){S.settings=blankSettings();saveSettings();return}
