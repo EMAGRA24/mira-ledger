@@ -9,7 +9,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mira Ledger">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:light}body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]{display:none!important}.bnav{padding-bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 14px))!important}
+.searchbar{top:calc(env(safe-area-inset-top,0px) + 62px)!important}
+</style>
 <title>Mira Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -214,7 +216,7 @@ svg text{fill:var(--muted);font-family:var(--f-body);font-size:11px}
 .wiz{padding:18px}
 
 /* blue & white skin */
-header.top{background:var(--hero-bg);border-bottom:0;padding-top:env(safe-area-inset-top,0px);margin-top:calc(-1 * env(safe-area-inset-top,0px))}
+header.top{background:var(--hero-bg);border-bottom:0;top:0!important;padding-top:env(safe-area-inset-top,0px)}
 header.top h1,header.top .peso{color:var(--hero-ink)}
 .hero{background:var(--hero-bg);color:var(--hero-ink);border-radius:var(--r);padding:18px 18px 14px;margin-top:4px}
 .hero .label{color:var(--hero-soft)}
