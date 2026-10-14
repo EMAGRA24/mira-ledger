@@ -1,0 +1,13 @@
+// Mira Ledger service worker: app works offline; updates arrive on next open.
+const CACHE="mira-ledger-v2";
+const CORE=["./","./index.html","./manifest.webmanifest","./icons/icon-192.png","./icons/icon-512.png","./icons/apple-touch-icon.png"];
+self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+self.addEventListener("fetch",e=>{const r=e.request;if(r.method!=="GET")return;
+  const url=new URL(r.url);
+  if(url.origin===location.origin&&(r.mode==="navigate"||url.pathname.endsWith("/")||url.pathname.endsWith(".html"))){
+    // app page: network first so updates show up, cached copy when offline
+    e.respondWith(fetch(r).then(res=>{const c=res.clone();caches.open(CACHE).then(x=>x.put("./index.html",c));return res}).catch(()=>caches.match("./index.html")));return}
+  // everything else (icons, fonts): cache first
+  e.respondWith(caches.match(r).then(hit=>hit||fetch(r).then(res=>{if(res.ok||res.type==="opaque"){const c=res.clone();caches.open(CACHE).then(x=>x.put(r,c))}return res})));
+});
